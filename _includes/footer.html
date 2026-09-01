@@ -1,0 +1,9 @@
+<footer class="site-footer">
+  <div class="container site-footer__inner">
+    <p>&copy; {{ site.time | date: '%Y' }} {{ site.author.name }}. 기록은 오래 남습니다.</p>
+    <div class="site-footer__links">
+      <a href="{{ '/feed.xml' | relative_url }}">RSS</a>
+      <a href="https://github.com/{{ site.github_username }}" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </div>
+  </div>
+</footer>

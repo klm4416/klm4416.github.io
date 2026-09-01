@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="{{ site.lang | default: 'ko-KR' }}">
+  <head>
+    {% include head.html %}
+  </head>
+  <body class="layout-{{ page.layout | default: 'default' }}">
+    <a class="skip-link" href="#main-content">본문으로 건너뛰기</a>
+    {% include header.html %}
+
+    <main id="main-content" class="site-main">
+      {{ content }}
+    </main>
+
+    {% include footer.html %}
+  </body>
+</html>

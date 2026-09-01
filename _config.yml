@@ -1,0 +1,56 @@
+# 사이트 기본 정보 — 블로그 이름과 소개 문구는 여기서 바꿉니다.
+title: KLM4416
+tagline: 배우고, 만들고, 기록합니다.
+description: 개발하며 배우고 만든 것을 기록하는 기술 블로그입니다.
+url: "https://klm4416.github.io"
+baseurl: ""
+lang: ko-KR
+timezone: Asia/Seoul
+
+author:
+  name: klm4416
+  url: "https://github.com/klm4416"
+
+social:
+  name: klm4416
+  links:
+    - "https://github.com/klm4416"
+
+github_username: klm4416
+repository: klm4416/klm4416.github.io
+
+# 글 URL: /posts/파일명/
+permalink: /posts/:title/
+excerpt_separator: "<!--more-->"
+
+markdown: kramdown
+highlighter: rouge
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+feed:
+  path: feed.xml
+
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: post
+  - scope:
+      path: ""
+      type: pages
+    values:
+      layout: page
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - vendor

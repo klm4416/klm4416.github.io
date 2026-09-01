@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">KLM4416</title>
+  <defs>
+    <linearGradient id="gradient" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7567ff"/>
+      <stop offset="1" stop-color="#3b82f6"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="18" fill="url(#gradient)"/>
+  <path d="M20 15h8v14.4L40.6 15H51L36.4 31.1 52 49H41.4L28 33.1V49h-8V15Z" fill="white"/>
+</svg>
