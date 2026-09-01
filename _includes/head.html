@@ -8,3 +8,20 @@
 <link rel="icon" href="{{ '/assets/images/favicon.svg' | relative_url }}" type="image/svg+xml">
 <link rel="alternate" href="{{ '/feed.xml' | relative_url }}" type="application/atom+xml" title="{{ site.title | escape }}">
 <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+{% if page.layout == 'home' %}
+<script>
+  (function () {
+    var html = document.documentElement;
+    var replay = /(?:\?|&)intro=1(?:&|$)/.test(window.location.search);
+    html.classList.add('has-js');
+    try {
+      if (!replay && window.sessionStorage.getItem('klm4416:intro:v1') === 'seen') {
+        html.classList.add('intro-seen');
+      }
+    } catch (error) {
+      // Storage can be unavailable in strict privacy modes. The intro still works.
+    }
+  }());
+</script>
+<link rel="stylesheet" href="{{ '/assets/css/intro.css' | relative_url }}">
+{% endif %}
