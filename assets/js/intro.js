@@ -3,21 +3,42 @@
 
   const root = document.getElementById("webgl-intro");
   const canvas = document.getElementById("webgl-intro-canvas");
-  const enterButton = document.getElementById("webgl-intro-enter");
+  const fallbackImage = document.getElementById("webgl-intro-fallback");
   const skipButton = document.getElementById("webgl-intro-skip");
   const status = document.getElementById("webgl-intro-status");
+  const profile = document.getElementById("webgl-intro-profile");
+  const clock = document.getElementById("webgl-intro-time");
   const cursor = document.getElementById("webgl-intro-cursor");
+  const enterButtons = root ? Array.from(root.querySelectorAll("[data-intro-enter]")) : [];
 
-  if (!root || !canvas || !enterButton || !skipButton || !status || !cursor) {
+  if (
+    !root ||
+    !canvas ||
+    !fallbackImage ||
+    !skipButton ||
+    !status ||
+    !profile ||
+    !clock ||
+    !cursor ||
+    enterButtons.length === 0
+  ) {
     return;
   }
 
-  const storageKey = "klm4416:intro:v1";
+  const storageKey = "klm4416:intro:v2";
   const html = document.documentElement;
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
   const currentUrl = new URL(window.location.href);
   const replayRequested = currentUrl.searchParams.get("intro") === "1";
+  const profileIndex = profile.querySelector(".webgl-intro__profile-index");
+  const profileTitle = profile.querySelector("strong");
+  const profileDescription = profile.querySelector("span:last-child");
+  const profiles = [
+    { index: "01", title: "BUILD", description: "CODE · PRODUCTS · EXPERIMENTS", left: "39%", accent: "8%" },
+    { index: "02", title: "THINK", description: "SYSTEMS · IDEAS · RESEARCH", left: "51%", accent: "37%" },
+    { index: "03", title: "RECORD", description: "NOTES · LESSONS · ARCHIVE", left: "65%", accent: "67%" },
+  ];
 
   if (html.classList.contains("intro-seen") && !replayRequested) {
     root.hidden = true;
@@ -53,62 +74,98 @@
   let enteringAt = 0;
   let completed = false;
   let completionTimer = 0;
+  let clockTimer = 0;
+  let wheelResetTimer = 0;
+  let wheelAccumulator = 0;
+  let hoverIndex = -1;
+  let touchStartY = null;
+
+  updateClock();
+  clockTimer = window.setInterval(updateClock, 30000);
+  installListeners();
 
   if (reduceMotion) {
-    setStaticMode();
+    setStaticMode("REDUCED MOTION / READY");
   } else {
-    try {
-      renderer = createWebGLRenderer(canvas);
-    } catch (error) {
-      console.warn("WebGL intro could not be initialized:", error);
-      renderer = null;
-    }
-
-    if (renderer) {
-      root.dataset.renderer = "webgl";
-      status.textContent = "GPU RENDER / READY";
-      canvas.classList.add("is-ready");
-      renderer.resize();
-      animationFrame = window.requestAnimationFrame(render);
-    } else {
-      setStaticMode();
-    }
+    initializeRenderer();
+    animationFrame = window.requestAnimationFrame(render);
   }
-
-  window.addEventListener("resize", handleResize, { passive: true });
-  document.addEventListener("visibilitychange", handleVisibilityChange);
-  root.addEventListener("pointermove", handlePointerMove, { passive: true });
-  root.addEventListener("pointerleave", handlePointerLeave, { passive: true });
-  root.addEventListener("keydown", handleKeydown);
-  enterButton.addEventListener("click", beginEntrance);
-  skipButton.addEventListener("click", skipEntrance);
-
-  [enterButton, skipButton].forEach((element) => {
-    element.addEventListener("pointerenter", () => root.classList.add("cursor-over-action"));
-    element.addEventListener("pointerleave", () => root.classList.remove("cursor-over-action"));
-  });
 
   window.setTimeout(() => {
     if (!completed) {
-      enterButton.focus({ preventScroll: true });
+      enterButtons[0].focus({ preventScroll: true });
     }
-  }, 400);
+  }, 500);
+
+  async function initializeRenderer() {
+    try {
+      if (!fallbackImage.complete) {
+        await fallbackImage.decode();
+      }
+
+      if (completed) {
+        return;
+      }
+
+      renderer = createWebGLRenderer(canvas, fallbackImage);
+      if (!renderer) {
+        setStaticMode("STATIC SCENE / READY");
+        return;
+      }
+
+      root.dataset.renderer = "webgl";
+      status.textContent = "WEBGL / READY";
+      renderer.resize();
+      canvas.classList.add("is-ready");
+    } catch (error) {
+      console.warn("WebGL intro could not be initialized:", error);
+      renderer = null;
+      setStaticMode("STATIC SCENE / READY");
+    }
+  }
+
+  function installListeners() {
+    window.addEventListener("resize", handleResize, { passive: true });
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    root.addEventListener("pointermove", handlePointerMove, { passive: true });
+    root.addEventListener("pointerleave", handlePointerLeave, { passive: true });
+    root.addEventListener("pointerdown", handlePointerDown, { passive: true });
+    root.addEventListener("pointerup", handlePointerUp, { passive: true });
+    root.addEventListener("wheel", handleWheel, { passive: false });
+    root.addEventListener("keydown", handleKeydown);
+    skipButton.addEventListener("click", skipEntrance);
+    enterButtons.forEach((button) => button.addEventListener("click", beginEntrance));
+
+    [...enterButtons, skipButton].forEach((element) => {
+      element.addEventListener("pointerenter", handleActionEnter);
+      element.addEventListener("pointerleave", handleActionLeave);
+    });
+  }
 
   function render(now) {
-    if (completed || !renderer) {
+    if (completed) {
       return;
     }
 
-    pointer.currentX += (pointer.targetX - pointer.currentX) * 0.065;
-    pointer.currentY += (pointer.targetY - pointer.currentY) * 0.065;
+    pointer.currentX += (pointer.targetX - pointer.currentX) * 0.075;
+    pointer.currentY += (pointer.targetY - pointer.currentY) * 0.075;
 
     let entranceProgress = 0;
     if (entering) {
-      entranceProgress = Math.min((now - enteringAt) / 1350, 1);
+      entranceProgress = Math.min((now - enteringAt) / 1380, 1);
       entranceProgress = easeInOutCubic(entranceProgress);
     }
 
-    renderer.draw(now * 0.001, pointer.currentX, pointer.currentY, entranceProgress);
+    if (renderer) {
+      renderer.draw(
+        now * 0.001,
+        pointer.currentX,
+        pointer.currentY,
+        entranceProgress,
+        hoverIndex
+      );
+    }
+
     animationFrame = window.requestAnimationFrame(render);
   }
 
@@ -119,14 +176,17 @@
 
     entering = true;
     enteringAt = performance.now();
+    hoverIndex = -1;
+    root.classList.remove("has-avatar-hover", "cursor-over-action");
     root.classList.add("is-entering");
-    root.classList.remove("cursor-over-action");
-    status.textContent = "ENTERING / ARCHIVE";
+    status.textContent = "OPENING / BLOG";
     disableActions();
     rememberIntro();
 
-    const duration = reduceMotion ? 260 : 1450;
-    completionTimer = window.setTimeout(() => completeEntrance(true), duration);
+    completionTimer = window.setTimeout(
+      () => completeEntrance(true),
+      reduceMotion ? 240 : 1520
+    );
   }
 
   function skipEntrance() {
@@ -135,11 +195,15 @@
     }
 
     entering = true;
+    hoverIndex = -1;
+    root.classList.remove("has-avatar-hover", "cursor-over-action");
     root.classList.add("is-skipping");
-    root.classList.remove("cursor-over-action");
     disableActions();
     rememberIntro();
-    completionTimer = window.setTimeout(() => completeEntrance(true), reduceMotion ? 80 : 300);
+    completionTimer = window.setTimeout(
+      () => completeEntrance(true),
+      reduceMotion ? 80 : 260
+    );
   }
 
   function completeEntrance(moveFocus) {
@@ -149,9 +213,10 @@
 
     completed = true;
     window.clearTimeout(completionTimer);
+    window.clearTimeout(wheelResetTimer);
+    window.clearInterval(clockTimer);
     window.cancelAnimationFrame(animationFrame);
-    window.removeEventListener("resize", handleResize);
-    document.removeEventListener("visibilitychange", handleVisibilityChange);
+    removeListeners();
     setPageInert(inertTargets, false);
 
     if (renderer) {
@@ -172,6 +237,24 @@
     }
   }
 
+  function removeListeners() {
+    window.removeEventListener("resize", handleResize);
+    document.removeEventListener("visibilitychange", handleVisibilityChange);
+    root.removeEventListener("pointermove", handlePointerMove);
+    root.removeEventListener("pointerleave", handlePointerLeave);
+    root.removeEventListener("pointerdown", handlePointerDown);
+    root.removeEventListener("pointerup", handlePointerUp);
+    root.removeEventListener("wheel", handleWheel);
+    root.removeEventListener("keydown", handleKeydown);
+    skipButton.removeEventListener("click", skipEntrance);
+    enterButtons.forEach((button) => button.removeEventListener("click", beginEntrance));
+
+    [...enterButtons, skipButton].forEach((element) => {
+      element.removeEventListener("pointerenter", handleActionEnter);
+      element.removeEventListener("pointerleave", handleActionLeave);
+    });
+  }
+
   function rememberIntro() {
     try {
       window.sessionStorage.setItem(storageKey, "seen");
@@ -181,13 +264,25 @@
   }
 
   function disableActions() {
-    enterButton.disabled = true;
+    enterButtons.forEach((button) => {
+      button.disabled = true;
+    });
     skipButton.disabled = true;
   }
 
-  function setStaticMode() {
+  function setStaticMode(message) {
     root.dataset.renderer = "static";
-    status.textContent = reduceMotion ? "REDUCED MOTION / READY" : "STATIC FIELD / READY";
+    status.textContent = message;
+  }
+
+  function updateClock() {
+    const formatter = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Seoul",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+    clock.textContent = `${formatter.format(new Date())}, KST · SEOUL`;
   }
 
   function handleResize() {
@@ -197,7 +292,7 @@
   }
 
   function handleVisibilityChange() {
-    if (!renderer || completed) {
+    if (completed || reduceMotion) {
       return;
     }
 
@@ -217,11 +312,53 @@
     if (!coarsePointer && event.pointerType !== "touch") {
       root.classList.add("has-pointer");
       cursor.style.transform = `translate3d(${event.clientX}px, ${event.clientY}px, 0) translate(-50%, -50%)`;
+      updateAvatarHover(event.clientX / width, event.clientY / height);
     }
   }
 
   function handlePointerLeave() {
-    root.classList.remove("has-pointer");
+    root.classList.remove("has-pointer", "has-avatar-hover");
+    root.style.setProperty("--hover-strength", "0");
+    hoverIndex = -1;
+  }
+
+  function handlePointerDown(event) {
+    if (event.pointerType === "touch") {
+      touchStartY = event.clientY;
+    }
+  }
+
+  function handlePointerUp(event) {
+    if (event.pointerType !== "touch" || touchStartY === null) {
+      return;
+    }
+
+    const distance = touchStartY - event.clientY;
+    touchStartY = null;
+    if (distance > 46) {
+      beginEntrance();
+    }
+  }
+
+  function handleWheel(event) {
+    if (entering || completed) {
+      return;
+    }
+
+    event.preventDefault();
+    wheelAccumulator = clamp(wheelAccumulator + event.deltaY, 0, 160);
+    const progress = Math.round((wheelAccumulator / 160) * 100);
+    status.textContent = progress > 8 ? `SCROLL / ${progress}%` : "WEBGL / READY";
+
+    window.clearTimeout(wheelResetTimer);
+    wheelResetTimer = window.setTimeout(() => {
+      wheelAccumulator = 0;
+      status.textContent = renderer ? "WEBGL / READY" : "STATIC SCENE / READY";
+    }, 700);
+
+    if (wheelAccumulator >= 150) {
+      beginEntrance();
+    }
   }
 
   function handleKeydown(event) {
@@ -231,13 +368,50 @@
     }
   }
 
-  function createWebGLRenderer(targetCanvas) {
+  function handleActionEnter() {
+    root.classList.add("cursor-over-action");
+  }
+
+  function handleActionLeave() {
+    root.classList.remove("cursor-over-action");
+  }
+
+  function updateAvatarHover(x, y) {
+    if (entering || y < 0.13 || y > 0.9 || x < 0.29 || x > 0.75) {
+      if (hoverIndex !== -1) {
+        hoverIndex = -1;
+        root.classList.remove("has-avatar-hover");
+        root.style.setProperty("--hover-strength", "0");
+        profile.setAttribute("aria-hidden", "true");
+      }
+      return;
+    }
+
+    const nextIndex = x < 0.43 ? 0 : x < 0.58 ? 1 : 2;
+    if (nextIndex === hoverIndex) {
+      return;
+    }
+
+    hoverIndex = nextIndex;
+    const selected = profiles[nextIndex];
+    profileIndex.textContent = selected.index;
+    profileTitle.textContent = selected.title;
+    profileDescription.textContent = selected.description;
+    profile.style.left = selected.left;
+    profile.setAttribute("aria-hidden", "false");
+    root.style.setProperty("--accent-left", selected.accent);
+    root.style.setProperty("--hover-strength", "0.72");
+    root.classList.add("has-avatar-hover");
+  }
+
+  function createWebGLRenderer(targetCanvas, image) {
     const gl = targetCanvas.getContext("webgl", {
-      alpha: false,
+      alpha: true,
       antialias: false,
       depth: false,
-      failIfMajorPerformanceCaveat: true,
+      failIfMajorPerformanceCaveat: false,
       powerPreference: "high-performance",
+      premultipliedAlpha: false,
       preserveDrawingBuffer: false,
       stencil: false,
     });
@@ -248,8 +422,10 @@
 
     const vertexSource = `
       attribute vec2 aPosition;
+      varying vec2 vUv;
 
       void main() {
+        vUv = aPosition * 0.5 + 0.5;
         gl_Position = vec4(aPosition, 0.0, 1.0);
       }
     `;
@@ -257,12 +433,14 @@
     const fragmentSource = `
       precision highp float;
 
+      varying vec2 vUv;
+      uniform sampler2D uImage;
       uniform vec2 uResolution;
-      uniform float uTime;
       uniform vec2 uPointer;
+      uniform float uTime;
       uniform float uEntrance;
-
-      const float PI = 3.14159265359;
+      uniform float uHover;
+      uniform float uImageAspect;
 
       mat2 rotate2d(float angle) {
         float sine = sin(angle);
@@ -270,142 +448,68 @@
         return mat2(cosine, -sine, sine, cosine);
       }
 
-      float hash21(vec2 point) {
-        point = fract(point * vec2(123.34, 456.21));
-        point += dot(point, point + 45.32);
-        return fract(point.x * point.y);
-      }
-
-      float starField(vec2 point, float time) {
-        float field = 0.0;
-
-        for (int index = 0; index < 4; index++) {
-          float layer = float(index);
-          float scale = 7.0 + layer * 5.5;
-          vec2 rotated = rotate2d(time * (0.008 + layer * 0.003)) * point;
-          vec2 grid = rotated * scale + layer * 13.7;
-          vec2 cell = floor(grid);
-          vec2 local = fract(grid) - 0.5;
-          float seed = hash21(cell + layer * 31.9);
-          vec2 offset = vec2(
-            hash21(cell + layer + 7.1),
-            hash21(cell + layer + 19.7)
-          ) - 0.5;
-          float distanceToStar = length(local - offset * 0.72);
-          float star = 1.0 - smoothstep(0.0, 0.038 + layer * 0.004, distanceToStar);
-          float twinkle = 0.58 + 0.42 * sin(time * (1.1 + seed * 2.4) + seed * 18.0);
-          field += star * step(0.79, seed) * twinkle / (1.0 + layer * 0.45);
-        }
-
-        return field;
-      }
-
-      float torusDistance(vec3 point, vec2 radii) {
-        vec2 torus = vec2(length(point.xy) - radii.x, point.z);
-        return length(torus) - radii.y;
-      }
-
-      float sceneDistance(vec3 point) {
-        point.xz = rotate2d(uTime * 0.17 + uPointer.x * 0.24) * point.xz;
-        point.yz = rotate2d(uTime * 0.11 - uPointer.y * 0.2) * point.yz;
-
-        float angle = atan(point.y, point.x);
-        float ripple = sin(angle * 8.0 + point.z * 5.5 - uTime * 1.35) * 0.024;
-        ripple += sin(angle * 3.0 - uTime * 0.7) * 0.012;
-
-        return torusDistance(point, vec2(0.8, 0.17 + ripple));
-      }
-
-      vec3 sceneNormal(vec3 point) {
-        vec2 epsilon = vec2(0.0025, 0.0);
-        return normalize(vec3(
-          sceneDistance(point + epsilon.xyy) - sceneDistance(point - epsilon.xyy),
-          sceneDistance(point + epsilon.yxy) - sceneDistance(point - epsilon.yxy),
-          sceneDistance(point + epsilon.yyx) - sceneDistance(point - epsilon.yyx)
-        ));
-      }
-
-      vec2 marchScene(vec3 origin, vec3 direction) {
-        float travel = 0.0;
-        float glow = 0.0;
-
-        for (int stepIndex = 0; stepIndex < 52; stepIndex++) {
-          vec3 point = origin + direction * travel;
-          float distanceToSurface = sceneDistance(point);
-          glow += exp(-20.0 * abs(distanceToSurface)) * 0.012;
-
-          if (distanceToSurface < 0.0015 || travel > 6.0) {
-            break;
-          }
-
-          travel += max(distanceToSurface * 0.72, 0.004);
-        }
-
-        return vec2(travel, glow);
+      float avatarZone(float x, float index) {
+        float center = index < 0.5 ? 0.19 : index < 1.5 ? 0.51 : 0.82;
+        return 1.0 - smoothstep(0.12, 0.27, abs(x - center));
       }
 
       void main() {
         vec2 resolution = max(uResolution, vec2(1.0));
-        vec2 uv = (gl_FragCoord.xy * 2.0 - resolution.xy) / min(resolution.x, resolution.y);
+        float aspect = resolution.x / resolution.y;
+        float portrait = step(resolution.x, resolution.y);
         float entrance = uEntrance * uEntrance * (3.0 - 2.0 * uEntrance);
+        float hoverActive = step(-0.5, uHover);
 
-        uv += uPointer * 0.035 * (1.0 - min(length(uv) * 0.35, 1.0));
+        vec2 point = vUv - 0.5;
+        point.x *= aspect;
+        point -= vec2(uPointer.x * 0.025, uPointer.y * 0.012) * (1.0 - entrance);
+        point = rotate2d(uPointer.x * 0.025 + entrance * 0.095) * point;
 
-        float radius = length(uv);
-        float angle = atan(uv.y, uv.x);
-        vec3 violet = vec3(0.43, 0.28, 1.0);
-        vec3 blue = vec3(0.02, 0.58, 1.0);
-        vec3 color = mix(vec3(0.006, 0.006, 0.015), vec3(0.018, 0.012, 0.055), uv.y * 0.24 + 0.5);
+        float imageHeight = mix(0.82, 0.62, portrait);
+        imageHeight = mix(imageHeight, 1.28, entrance);
+        float widthScale = mix(0.84, 1.0, portrait);
+        vec2 imageUv = point / vec2(uImageAspect * imageHeight * widthScale, imageHeight) + 0.5;
 
-        float stars = starField(uv * mix(1.0, 2.4, entrance), uTime + entrance * 7.0);
-        color += mix(violet, blue, radius) * stars * (0.55 + entrance * 0.9);
+        float inside =
+          step(0.0, imageUv.x) *
+          step(imageUv.x, 1.0) *
+          step(0.0, imageUv.y) *
+          step(imageUv.y, 1.0);
 
-        float orbitalRing = exp(-17.0 * abs(radius - 0.53));
-        float orbitalBands = 0.5 + 0.5 * sin(angle * 12.0 - radius * 19.0 + uTime * 1.2);
-        color += mix(violet, blue, orbitalBands) * orbitalRing * orbitalBands * 0.12;
-
-        vec3 cameraOrigin = vec3(
-          uPointer.x * 0.1,
-          uPointer.y * 0.07,
-          mix(2.75, 0.24, entrance)
-        );
-        vec3 rayDirection = normalize(vec3(uv * mix(0.82, 1.18, entrance), -1.72));
-        vec2 march = marchScene(cameraOrigin, rayDirection);
-
-        color += mix(violet, blue, 0.5 + 0.5 * sin(angle + uTime)) * march.y * 0.48;
-
-        if (march.x < 6.0) {
-          vec3 surfacePoint = cameraOrigin + rayDirection * march.x;
-          float surfaceCheck = abs(sceneDistance(surfacePoint));
-
-          if (surfaceCheck < 0.018) {
-            vec3 normal = sceneNormal(surfacePoint);
-            vec3 lightDirection = normalize(vec3(-0.45, 0.72, 0.9));
-            float diffuse = max(dot(normal, lightDirection), 0.0);
-            float fresnel = pow(1.0 - max(dot(normal, -rayDirection), 0.0), 2.4);
-            float specular = pow(max(dot(reflect(-lightDirection, normal), -rayDirection), 0.0), 28.0);
-            float paletteShift = 0.5 + 0.5 * sin(surfacePoint.y * 4.0 + surfacePoint.x * 2.0 + uTime);
-            vec3 surfaceColor = mix(violet, blue, paletteShift);
-
-            color += surfaceColor * (0.2 + diffuse * 0.48 + fresnel * 1.7);
-            color += vec3(0.82, 0.88, 1.0) * specular * 1.5;
-          }
+        if (inside < 0.5) {
+          gl_FragColor = vec4(0.0);
+          return;
         }
 
-        float centerMask = smoothstep(0.08, 0.34, radius);
-        color *= mix(0.3, 1.0, centerMask);
+        float motion = sin(imageUv.y * 19.0 + uTime * 1.35) * 0.0008;
+        motion += sin(imageUv.y * 43.0 - uTime * 0.7) * 0.00035;
+        motion *= 1.0 + hoverActive * 1.5 + entrance * 7.0;
+        imageUv.x += motion;
 
-        float radialLines = pow(max(0.0, sin(angle * 54.0 + uTime * 2.0)), 18.0);
-        radialLines *= 1.0 - smoothstep(0.15, 1.4, radius);
-        color += mix(violet, blue, radius) * radialLines * pow(entrance, 3.0) * 0.7;
-        color += mix(violet, vec3(0.75, 0.88, 1.0), 0.55) * pow(entrance, 8.0) * 1.25;
+        float split = 0.00045 + hoverActive * 0.0012 + entrance * 0.006;
+        vec4 base = texture2D(uImage, imageUv);
+        vec4 redSample = texture2D(uImage, imageUv + vec2(split, 0.0));
+        vec4 blueSample = texture2D(uImage, imageUv - vec2(split, 0.0));
+        float alpha = max(base.a, max(redSample.a, blueSample.a));
 
-        float vignette = 1.0 - smoothstep(0.45, 1.55, radius) * 0.72;
-        color *= mix(vignette, 1.0, entrance * 0.7);
-        color = 1.0 - exp(-color * 1.2);
-        color = pow(color, vec3(0.4545));
+        vec3 color = vec3(redSample.r, base.g, blueSample.b);
+        float zone = avatarZone(imageUv.x, max(uHover, 0.0)) * hoverActive;
+        color *= 1.0 + zone * 0.09;
 
-        gl_FragColor = vec4(color, 1.0);
+        vec2 pixel = 1.6 / resolution;
+        float nearbyAlpha = max(
+          max(texture2D(uImage, imageUv + vec2(pixel.x, 0.0)).a, texture2D(uImage, imageUv - vec2(pixel.x, 0.0)).a),
+          max(texture2D(uImage, imageUv + vec2(0.0, pixel.y)).a, texture2D(uImage, imageUv - vec2(0.0, pixel.y)).a)
+        );
+        float edge = max(nearbyAlpha - base.a, 0.0) * zone;
+        color = mix(color, vec3(1.0, 0.22, 0.02), edge * 0.85);
+
+        float scanline = 0.985 + 0.015 * sin(gl_FragCoord.y * 0.9 + uTime * 2.0);
+        color *= scanline;
+        color = mix(color, vec3(dot(color, vec3(0.299, 0.587, 0.114))) * vec3(0.2, 0.48, 1.0), entrance * 0.6);
+        alpha *= inside;
+
+        gl_FragColor = vec4(color, alpha);
       }
     `;
 
@@ -443,10 +547,27 @@
 
     const positionLocation = gl.getAttribLocation(program, "aPosition");
     const resolutionLocation = gl.getUniformLocation(program, "uResolution");
-    const timeLocation = gl.getUniformLocation(program, "uTime");
     const pointerLocation = gl.getUniformLocation(program, "uPointer");
+    const timeLocation = gl.getUniformLocation(program, "uTime");
     const entranceLocation = gl.getUniformLocation(program, "uEntrance");
+    const hoverLocation = gl.getUniformLocation(program, "uHover");
+    const imageAspectLocation = gl.getUniformLocation(program, "uImageAspect");
+    const imageLocation = gl.getUniformLocation(program, "uImage");
     const buffer = gl.createBuffer();
+    const texture = gl.createTexture();
+
+    if (!buffer || !texture || positionLocation < 0) {
+      if (buffer) {
+        gl.deleteBuffer(buffer);
+      }
+      if (texture) {
+        gl.deleteTexture(texture);
+      }
+      gl.deleteProgram(program);
+      gl.deleteShader(vertexShader);
+      gl.deleteShader(fragmentShader);
+      return null;
+    }
 
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.bufferData(
@@ -454,13 +575,28 @@
       new Float32Array([-1, -1, 3, -1, -1, 3]),
       gl.STATIC_DRAW
     );
+
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+
     gl.useProgram(program);
     gl.enableVertexAttribArray(positionLocation);
     gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+    gl.uniform1i(imageLocation, 0);
+    gl.uniform1f(imageAspectLocation, image.naturalWidth / image.naturalHeight);
+    gl.disable(gl.DEPTH_TEST);
+    gl.disable(gl.BLEND);
+    gl.clearColor(0, 0, 0, 0);
 
     function resize() {
-      const mobile = window.innerWidth < 760;
-      const maxPixelRatio = mobile ? 1 : 1.5;
+      const mobile = window.innerWidth < 820;
+      const maxPixelRatio = mobile ? 1 : 1.25;
       const pixelRatio = Math.min(window.devicePixelRatio || 1, maxPixelRatio);
       const width = Math.max(Math.floor(window.innerWidth * pixelRatio), 1);
       const height = Math.max(Math.floor(window.innerHeight * pixelRatio), 1);
@@ -472,16 +608,21 @@
       }
     }
 
-    function draw(time, pointerX, pointerY, entranceProgress) {
+    function draw(time, pointerX, pointerY, entranceProgress, activeHoverIndex) {
+      gl.clear(gl.COLOR_BUFFER_BIT);
       gl.useProgram(program);
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, texture);
       gl.uniform2f(resolutionLocation, targetCanvas.width, targetCanvas.height);
-      gl.uniform1f(timeLocation, time);
       gl.uniform2f(pointerLocation, pointerX, pointerY);
+      gl.uniform1f(timeLocation, time);
       gl.uniform1f(entranceLocation, entranceProgress);
+      gl.uniform1f(hoverLocation, activeHoverIndex);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     }
 
     function destroy() {
+      gl.deleteTexture(texture);
       gl.deleteBuffer(buffer);
       gl.deleteProgram(program);
       gl.deleteShader(vertexShader);
@@ -498,6 +639,10 @@
 
   function compileShader(gl, type, source) {
     const shader = gl.createShader(type);
+    if (!shader) {
+      return null;
+    }
+
     gl.shaderSource(shader, source);
     gl.compileShader(shader);
 
@@ -531,5 +676,9 @@
     return value < 0.5
       ? 4 * value * value * value
       : 1 - Math.pow(-2 * value + 2, 3) / 2;
+  }
+
+  function clamp(value, minimum, maximum) {
+    return Math.min(Math.max(value, minimum), maximum);
   }
 })();

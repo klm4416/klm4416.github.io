@@ -54,6 +54,7 @@ tags: [jekyll, github-pages]
 | 홈의 큰 소개 문구 | `_layouts/home.html` |
 | WebGL 셰이더와 전환 동작 | `assets/js/intro.js` |
 | WebGL 인트로 디자인 | `assets/css/intro.scss` |
+| 인트로 오리지널 마스코트 | `assets/images/intro-mascots.png` |
 | 자기소개 | `about.md` |
 | 색상과 전체 디자인 | `assets/css/style.scss` |
 | 첫 예시 글 | `_posts/2026-09-01-welcome.md` |

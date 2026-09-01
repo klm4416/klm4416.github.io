@@ -15,7 +15,7 @@
     var replay = /(?:\?|&)intro=1(?:&|$)/.test(window.location.search);
     html.classList.add('has-js');
     try {
-      if (!replay && window.sessionStorage.getItem('klm4416:intro:v1') === 'seen') {
+      if (!replay && window.sessionStorage.getItem('klm4416:intro:v2') === 'seen') {
         html.classList.add('intro-seen');
       }
     } catch (error) {
