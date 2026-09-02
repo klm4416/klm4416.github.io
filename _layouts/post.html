@@ -6,33 +6,48 @@ layout: default
 {% assign reading_time = words | divided_by: 180 %}
 {% if reading_time < 1 %}{% assign reading_time = 1 %}{% endif %}
 
-<article class="post container container--narrow">
+<article class="post">
   <header class="post__header">
-    <a class="back-link" href="{{ '/' | relative_url }}#posts"><span aria-hidden="true">←</span> 모든 글</a>
-    <div class="post__meta">
-      <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: '%Y.%m.%d' }}</time>
-      <span aria-hidden="true">·</span>
-      <span>읽는 시간 약 {{ reading_time }}분</span>
-    </div>
-    <h1>{{ page.title }}</h1>
-    {% if page.description %}
-      <p class="post__description">{{ page.description }}</p>
-    {% endif %}
-    {% if page.tags.size > 0 %}
-      <div class="tag-list" aria-label="태그">
-        {% for tag in page.tags %}
-          <span class="tag">#{{ tag }}</span>
-        {% endfor %}
+    <div class="container">
+      <a class="back-link" href="{{ '/' | relative_url }}#posts"><span aria-hidden="true">←</span> INDEX / ALL NOTES</a>
+      <div class="post__header-layout">
+        <div class="post__index" aria-hidden="true">01</div>
+        <div class="post__heading">
+          <div class="post__meta">
+            <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: '%Y.%m.%d' }}</time>
+            <span aria-hidden="true">/</span>
+            <span>READ {{ reading_time }} MIN</span>
+          </div>
+          <h1>{{ page.title }}</h1>
+          {% if page.description %}
+            <p class="post__description">{{ page.description }}</p>
+          {% endif %}
+          {% if page.tags.size > 0 %}
+            <div class="tag-list" aria-label="태그">
+              {% for tag in page.tags %}
+                <span class="tag">{{ tag }}</span>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
       </div>
-    {% endif %}
+    </div>
   </header>
 
-  <div class="prose">
-    {{ content }}
+  <div class="container post__body">
+    <aside class="post__rail" aria-label="글 정보">
+      <span>FIELD NOTE</span>
+      <strong>{{ page.date | date: '%Y' }}</strong>
+      <i aria-hidden="true"></i>
+      <small>KLM4416<br>SEOUL, KR</small>
+    </aside>
+    <div class="prose">
+      {{ content }}
+    </div>
   </div>
 
   {% if page.previous or page.next %}
-    <nav class="post-navigation" aria-label="이전 및 다음 글">
+    <nav class="post-navigation container" aria-label="이전 및 다음 글">
       {% if page.previous %}
         <a class="post-navigation__item" href="{{ page.previous.url | relative_url }}">
           <span>이전 글</span>

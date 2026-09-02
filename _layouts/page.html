@@ -2,15 +2,23 @@
 layout: default
 ---
 
-<article class="page container container--narrow">
+<article class="page">
   <header class="page__header">
-    <p class="eyebrow">{{ page.eyebrow | default: 'ABOUT' }}</p>
-    <h1>{{ page.title }}</h1>
-    {% if page.description %}
-      <p>{{ page.description }}</p>
-    {% endif %}
+    <div class="container page__header-inner">
+      <p class="eyebrow"><span>01</span> PAGE / {{ page.eyebrow | default: 'ABOUT' }}</p>
+      <h1>{{ page.title }}</h1>
+      {% if page.description %}
+        <p>{{ page.description }}</p>
+      {% endif %}
+    </div>
   </header>
-  <div class="prose">
-    {{ content }}
+  <div class="container page__body">
+    <aside class="page__rail" aria-label="페이지 정보">
+      <span>PERSONAL<br>DIGITAL ARCHIVE</span>
+      <strong>SEOUL / KR</strong>
+    </aside>
+    <div class="prose">
+      {{ content }}
+    </div>
   </div>
 </article>
