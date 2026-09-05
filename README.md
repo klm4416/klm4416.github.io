@@ -37,6 +37,11 @@ JEKYLL_ENV=production bundle exec jekyll build
 title: 글 제목
 description: 검색 결과와 공유 카드에 표시할 짧은 설명
 date: 2026-09-01 12:00:00 +0900
+section: Technology
+kicker: 제목 위에 표시할 짧은 문구
+image: /assets/images/example.svg
+image_alt: 이미지 대체 텍스트
+image_caption: 이미지 설명과 출처
 categories: [개발]
 tags: [jekyll, github-pages]
 ---
@@ -51,9 +56,9 @@ tags: [jekyll, github-pages]
 | 목적 | 파일 |
 | --- | --- |
 | 블로그 이름, 설명, GitHub 계정 | `_config.yml` |
-| 홈의 큰 소개 문구 | `_layouts/home.html` |
+| 홈의 기사 그리드와 섹션 | `_layouts/home.html` |
 | 자기소개 | `about.md` |
-| 편집형 레이아웃과 전체 디자인 | `assets/css/style.scss` |
+| 기사형 레이아웃과 전체 디자인 | `assets/css/style.scss` |
 | 첫 예시 글 | `_posts/2026-09-01-welcome.md` |
 
 `_config.yml`을 수정한 뒤에는 로컬 서버를 다시 시작해야 변경 사항이 반영됩니다.

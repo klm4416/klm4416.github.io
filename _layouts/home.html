@@ -7,104 +7,144 @@ layout: default
   {% assign featured_words = featured.content | number_of_words %}
   {% assign featured_reading_time = featured_words | divided_by: 180 %}
   {% if featured_reading_time < 1 %}{% assign featured_reading_time = 1 %}{% endif %}
-  {% assign featured_section = featured.categories | first | default: '기록' %}
+  {% assign featured_section = featured.section %}
+  {% unless featured_section %}{% assign featured_section = featured.categories | first %}{% endunless %}
+  {% assign featured_section = featured_section | default: 'Technology' %}
 {% endif %}
 
-<section class="front-page" aria-labelledby="front-page-title">
+<section class="home-lead" id="latest" aria-labelledby="latest-heading">
   <div class="container">
-    <div class="section-rule">
-      <p>THE LATEST BRIEFING</p>
-      <p>VOL. 01 / {{ site.time | date: '%Y' }}</p>
-    </div>
+    <h1 class="visually-hidden" id="latest-heading">KLM4416 최신 글</h1>
 
     {% if featured %}
-      <div class="lead-grid">
-        <article class="lead-story">
-          <p class="story-kicker">{{ featured_section }}</p>
-          <h1 id="front-page-title"><a href="{{ featured.url | relative_url }}">{{ featured.title }}</a></h1>
-          <p class="lead-story__standfirst">{{ featured.description | default: featured.excerpt | strip_html | strip_newlines | truncate: 190 }}</p>
+      <div class="lead-package">
+        <a class="lead-package__media" href="{{ featured.url | relative_url }}" aria-label="{{ featured.title | escape }} 읽기">
+          {% if featured.image %}
+            <img src="{{ featured.image | relative_url }}" alt="{{ featured.image_alt | default: '' | escape }}" width="1600" height="900">
+          {% else %}
+            <span class="story-placeholder" aria-hidden="true"><b>KLM</b><i>FIELD NOTE</i></span>
+          {% endif %}
+        </a>
+
+        <article class="lead-package__story">
+          <p class="story-section">{{ featured_section }}</p>
+          {% if featured.kicker %}<p class="story-rubric">{{ featured.kicker }}</p>{% endif %}
+          <h2><a href="{{ featured.url | relative_url }}">{{ featured.title }}</a></h2>
+          <p class="story-summary">{{ featured.description | default: featured.excerpt | strip_html | strip_newlines | truncate: 175 }}</p>
           <div class="story-meta">
             <time datetime="{{ featured.date | date_to_xmlschema }}">{{ featured.date | date: '%Y.%m.%d' }}</time>
-            <span aria-hidden="true">•</span>
-            <span>{{ featured_reading_time }} MIN READ</span>
+            <span>{{ featured_reading_time }} min read</span>
           </div>
-          <a class="read-link" href="{{ featured.url | relative_url }}">READ THE NOTE <span aria-hidden="true">→</span></a>
         </article>
 
-        <aside class="issue-card" aria-label="KLM4416 저널 소개">
-          <div class="issue-card__top">
-            <span>KLM REVIEW</span>
-            <span>NO. 001</span>
-          </div>
-          <p class="issue-card__symbol" aria-hidden="true">{ }</p>
-          <div class="issue-card__bottom">
-            <strong>BUILD<br>THINK<br>RECORD</strong>
-            <span>NOTES ON<br>WORKING SYSTEMS</span>
-          </div>
+        <aside class="in-brief" aria-labelledby="in-brief-heading">
+          <h2 id="in-brief-heading">In brief</h2>
+          <ol>
+            {% if site.posts.size > 1 %}
+              {% for post in site.posts offset: 1 limit: 4 %}
+                <li><a href="{{ post.url | relative_url }}">{{ post.title }}</a><time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: '%m.%d' }}</time></li>
+              {% endfor %}
+            {% else %}
+              <li><a href="{{ '/about/' | relative_url }}">왜 이 기술 저널을 시작했는가</a><span>About</span></li>
+              <li><a href="{{ '/feed.xml' | relative_url }}">새 글을 RSS로 받아보기</a><span>Feed</span></li>
+              <li><a href="https://github.com/{{ site.github_username }}" target="_blank" rel="noopener noreferrer">작업 중인 프로젝트 살펴보기</a><span>GitHub</span></li>
+            {% endif %}
+          </ol>
         </aside>
       </div>
     {% else %}
-      <div class="lead-story lead-story--empty">
-        <p class="story-kicker">EDITOR'S NOTE</p>
-        <h1 id="front-page-title">The first note is being written.</h1>
-        <p class="lead-story__standfirst"><code>_posts</code> 폴더에 Markdown 파일을 추가하면 새로운 글이 이곳에 실립니다.</p>
+      <div class="lead-package lead-package--empty">
+        <p class="story-section">Editor's note</p>
+        <h2>The first story is being written.</h2>
+        <p><code>_posts</code> 폴더에 Markdown 파일을 추가하면 이곳에 표시됩니다.</p>
       </div>
     {% endif %}
   </div>
 </section>
 
-<section class="post-section" id="posts" aria-labelledby="post-list-title">
-  <div class="container">
-    <div class="section-rule section-rule--heavy">
-      <h2 id="post-list-title">Latest notes</h2>
-      <p>{{ site.posts.size }} STORIES</p>
+<aside class="dispatch-banner" aria-label="RSS 구독 안내">
+  <div class="container dispatch-banner__inner">
+    <div>
+      <p>The weekly dispatch</p>
+      <h2>새로운 기술 기록을 놓치지 마세요.</h2>
     </div>
+    <p>광고나 추적 없이 새 글을 받아보는 가장 단순한 방법입니다.</p>
+    <a href="{{ '/feed.xml' | relative_url }}">Follow via RSS</a>
+  </div>
+</aside>
 
-    <div class="journal-grid">
-      <div class="post-list">
+<section class="latest-section" id="posts" aria-labelledby="post-list-title">
+  <div class="container">
+    <header class="section-heading">
+      <h2 id="post-list-title">Latest</h2>
+      <p>Analysis and notes on technology</p>
+    </header>
+
+    <div class="latest-layout">
+      <div class="story-feed">
         {% if site.posts.size > 0 %}
           {% for post in site.posts %}
             {% assign words = post.content | number_of_words %}
             {% assign reading_time = words | divided_by: 180 %}
             {% if reading_time < 1 %}{% assign reading_time = 1 %}{% endif %}
-            {% assign post_section = post.categories | first | default: '기록' %}
-            <article class="post-card">
-              <span class="post-card__index">{% if forloop.index < 10 %}0{% endif %}{{ forloop.index }}</span>
-              <div class="post-card__content">
-                <p class="story-kicker">{{ post_section }}</p>
+            {% assign post_section = post.section %}
+            {% unless post_section %}{% assign post_section = post.categories | first %}{% endunless %}
+            {% assign post_section = post_section | default: 'Technology' %}
+            <article class="story-row">
+              <a class="story-row__media" href="{{ post.url | relative_url }}" tabindex="-1" aria-hidden="true">
+                {% if post.image %}
+                  <img src="{{ post.image | relative_url }}" alt="" width="1600" height="900" loading="lazy">
+                {% else %}
+                  <span class="story-placeholder"><b>{ }</b><i>KLM4416</i></span>
+                {% endif %}
+              </a>
+              <div class="story-row__copy">
+                <p class="story-section">{{ post_section }}</p>
                 <h3><a href="{{ post.url | relative_url }}">{{ post.title }}</a></h3>
-                <p>{{ post.description | default: post.excerpt | strip_html | strip_newlines | truncate: 170 }}</p>
+                <p class="story-summary">{{ post.description | default: post.excerpt | strip_html | strip_newlines | truncate: 160 }}</p>
                 <div class="story-meta">
                   <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: '%Y.%m.%d' }}</time>
-                  <span aria-hidden="true">•</span>
-                  <span>{{ reading_time }} MIN READ</span>
+                  <span>{{ reading_time }} min read</span>
                 </div>
               </div>
-              <a class="post-card__arrow" href="{{ post.url | relative_url }}" aria-label="{{ post.title | escape }} 읽기">→</a>
             </article>
           {% endfor %}
         {% else %}
           <div class="empty-state">
-            <p>THE NOTEBOOK IS OPEN</p>
-            <h3>First story coming soon.</h3>
+            <h3>The notebook is open.</h3>
+            <p>첫 번째 글을 준비하고 있습니다.</p>
           </div>
         {% endif %}
       </div>
 
-      <aside class="journal-rail" aria-labelledby="journal-rail-title">
-        <p class="journal-rail__label">ABOUT THIS JOURNAL</p>
-        <h3 id="journal-rail-title">기술을 소비하지 않고 해석합니다.</h3>
-        <p>코드, 제품, 시스템을 직접 만들며 얻은 판단을 짧고 정확하게 남기는 개인 기술 저널입니다.</p>
-
-        <div class="desk-list" aria-label="주요 주제">
-          <div><span>01</span><strong>ENGINEERING</strong></div>
-          <div><span>02</span><strong>SYSTEMS</strong></div>
-          <div><span>03</span><strong>PRODUCTS</strong></div>
-          <div><span>04</span><strong>RESEARCH</strong></div>
+      <aside class="most-read" aria-labelledby="most-read-title">
+        <h2 id="most-read-title">Most read</h2>
+        <ol>
+          {% for post in site.posts limit: 5 %}
+            <li><span>{{ forloop.index }}</span><a href="{{ post.url | relative_url }}">{{ post.title }}</a></li>
+          {% endfor %}
+        </ol>
+        <div class="most-read__about">
+          <p>About KLM4416</p>
+          <h3>기술을 소비하지 않고 해석합니다.</h3>
+          <a href="{{ '/about/' | relative_url }}">Read about the journal →</a>
         </div>
-
-        <a class="read-link" href="{{ '/about/' | relative_url }}">ABOUT KLM4416 <span aria-hidden="true">→</span></a>
       </aside>
+    </div>
+  </div>
+</section>
+
+<section class="desk-section" aria-labelledby="desk-title">
+  <div class="container">
+    <header class="section-heading">
+      <h2 id="desk-title">Explore the journal</h2>
+      <p>Four desks, one point of view</p>
+    </header>
+    <div class="desk-grid">
+      <article id="desk-engineering"><p>01</p><h3>Engineering</h3><span>코드와 구현에서 배운 것</span></article>
+      <article id="desk-systems"><p>02</p><h3>Systems</h3><span>복잡한 구조를 작동시키는 법</span></article>
+      <article id="desk-products"><p>03</p><h3>Products</h3><span>제품을 만들며 내린 판단</span></article>
+      <article id="desk-research"><p>04</p><h3>Research</h3><span>다시 꺼내 볼 조사와 기록</span></article>
     </div>
   </div>
 </section>
