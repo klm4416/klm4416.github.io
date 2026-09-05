@@ -1,23 +1,26 @@
 <header class="site-header">
-  <div class="container site-header__inner">
+  <div class="edition-bar">
+    <div class="container edition-bar__inner">
+      <p><strong>SEOUL</strong><span aria-hidden="true">•</span>{{ site.time | date: '%Y.%m.%d' }}</p>
+      <p>INDEPENDENT TECHNOLOGY JOURNAL</p>
+    </div>
+  </div>
+
+  <div class="container masthead">
     <a class="brand" href="{{ '/' | relative_url }}" aria-label="{{ site.title | escape }} 홈">
-      <span class="brand__mark" aria-hidden="true">
-        <svg viewBox="0 0 32 32" width="32" height="32">
-          <circle cx="16" cy="16" r="15" fill="currentColor"/>
-          <path d="M8 15.5c2.3 0 2.3 3 4.6 3s2.3-5 4.7-5 2.3 3 4.7 3" fill="none" stroke="#f8f1e3" stroke-width="1.8" stroke-linecap="round"/>
-        </svg>
-      </span>
-      <span class="brand__text">
-        <strong>{{ site.title }} / ARCHIVE</strong>
-        <small>PERSONAL DEV STUDIO</small>
-      </span>
+      <strong class="brand__name">{{ site.title }}</strong>
+      <span class="brand__descriptor">Technology, systems<br>and field notes</span>
     </a>
 
-    <nav class="site-nav" aria-label="주요 메뉴">
-      <a class="site-nav__link{% if page.url == '/' or page.layout == 'post' %} is-active{% endif %}" href="{{ '/' | relative_url }}#posts"{% if page.url == '/' or page.layout == 'post' %} aria-current="page"{% endif %}>INDEX</a>
-      <a class="site-nav__link{% if page.url == '/about/' %} is-active{% endif %}" href="{{ '/about/' | relative_url }}"{% if page.url == '/about/' %} aria-current="page"{% endif %}>ABOUT</a>
-      <a class="site-nav__link site-nav__link--intro" href="{{ '/' | relative_url }}?intro=1">REPLAY</a>
-      <a class="site-nav__link site-nav__link--icon" href="https://github.com/{{ site.github_username }}" target="_blank" rel="noopener noreferrer" aria-label="GitHub 프로필 열기">GH ↗</a>
-    </nav>
+    <p class="masthead__statement">Ideas are cheap.<br><strong>Judgement is the work.</strong></p>
   </div>
+
+  <nav class="site-nav" aria-label="주요 메뉴">
+    <div class="container site-nav__inner">
+      <a class="site-nav__link{% if page.url == '/' or page.layout == 'post' %} is-active{% endif %}" href="{{ '/' | relative_url }}#posts"{% if page.url == '/' or page.layout == 'post' %} aria-current="page"{% endif %}>LATEST</a>
+      <a class="site-nav__link{% if page.url == '/about/' %} is-active{% endif %}" href="{{ '/about/' | relative_url }}"{% if page.url == '/about/' %} aria-current="page"{% endif %}>ABOUT</a>
+      <a class="site-nav__link" href="{{ '/feed.xml' | relative_url }}">RSS</a>
+      <a class="site-nav__link site-nav__link--external" href="https://github.com/{{ site.github_username }}" target="_blank" rel="noopener noreferrer">GITHUB <span aria-hidden="true">↗</span></a>
+    </div>
+  </nav>
 </header>
