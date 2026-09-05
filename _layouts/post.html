@@ -8,38 +8,31 @@ layout: default
 
 <article class="post">
   <header class="post__header">
-    <div class="container">
-      <a class="back-link" href="{{ '/' | relative_url }}#posts"><span aria-hidden="true">←</span> INDEX / ALL NOTES</a>
-      <div class="post__header-layout">
-        <div class="post__index" aria-hidden="true">01</div>
-        <div class="post__heading">
-          <div class="post__meta">
-            <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: '%Y.%m.%d' }}</time>
-            <span aria-hidden="true">/</span>
-            <span>READ {{ reading_time }} MIN</span>
-          </div>
-          <h1>{{ page.title }}</h1>
-          {% if page.description %}
-            <p class="post__description">{{ page.description }}</p>
-          {% endif %}
-          {% if page.tags.size > 0 %}
-            <div class="tag-list" aria-label="태그">
-              {% for tag in page.tags %}
-                <span class="tag">{{ tag }}</span>
-              {% endfor %}
-            </div>
-          {% endif %}
-        </div>
+    <div class="container container--article">
+      <a class="back-link" href="{{ '/' | relative_url }}#posts"><span aria-hidden="true">←</span> BACK TO LATEST</a>
+      <p class="story-kicker">{{ page.categories | first | default: '기록' }}</p>
+      <h1>{{ page.title }}</h1>
+      {% if page.description %}
+        <p class="post__description">{{ page.description }}</p>
+      {% endif %}
+      <div class="post__byline">
+        <p>BY <strong>{{ site.author.name | upcase }}</strong></p>
+        <p><time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: '%Y.%m.%d' }}</time><span aria-hidden="true"> • </span>{{ reading_time }} MIN READ</p>
       </div>
     </div>
   </header>
 
-  <div class="container post__body">
+  <div class="container container--article post__body">
     <aside class="post__rail" aria-label="글 정보">
-      <span>FIELD NOTE</span>
-      <strong>{{ page.date | date: '%Y' }}</strong>
-      <i aria-hidden="true"></i>
-      <small>KLM4416<br>SEOUL, KR</small>
+      <p>FILED UNDER</p>
+      {% if page.tags.size > 0 %}
+        <div class="tag-list">
+          {% for tag in page.tags %}<span class="tag">{{ tag }}</span>{% endfor %}
+        </div>
+      {% else %}
+        <strong>FIELD NOTES</strong>
+      {% endif %}
+      <p class="post__rail-location">SEOUL<br>REPUBLIC OF KOREA</p>
     </aside>
     <div class="prose">
       {{ content }}

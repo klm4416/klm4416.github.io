@@ -52,11 +52,8 @@ tags: [jekyll, github-pages]
 | --- | --- |
 | 블로그 이름, 설명, GitHub 계정 | `_config.yml` |
 | 홈의 큰 소개 문구 | `_layouts/home.html` |
-| WebGL 셰이더와 전환 동작 | `assets/js/intro.js` |
-| WebGL 인트로 디자인 | `assets/css/intro.scss` |
-| 인트로 오리지널 마스코트 | `assets/images/intro-mascots.png` |
 | 자기소개 | `about.md` |
-| 색상과 전체 디자인 | `assets/css/style.scss` |
+| 편집형 레이아웃과 전체 디자인 | `assets/css/style.scss` |
 | 첫 예시 글 | `_posts/2026-09-01-welcome.md` |
 
 `_config.yml`을 수정한 뒤에는 로컬 서버를 다시 시작해야 변경 사항이 반영됩니다.
