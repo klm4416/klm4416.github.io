@@ -3,19 +3,20 @@ layout: default
 ---
 
 <article class="page">
-  <header class="page__header">
-    <div class="container container--article page__header-inner">
-      <p class="story-kicker">PAGE / {{ page.eyebrow | default: 'ABOUT' }}</p>
+  <header class="page-header">
+    <div class="container container--story">
+      <p class="story-section">{{ page.eyebrow | default: 'About the journal' }}</p>
       <h1>{{ page.title }}</h1>
       {% if page.description %}
         <p>{{ page.description }}</p>
       {% endif %}
     </div>
   </header>
-  <div class="container container--article page__body">
-    <aside class="page__rail" aria-label="페이지 정보">
-      <span>KLM4416<br>TECHNOLOGY JOURNAL</span>
+  <div class="container container--story page-grid">
+    <aside class="page-folio" aria-label="페이지 정보">
+      <span>KLM4416</span>
       <strong>EST. 2026</strong>
+      <p>SEOUL<br>KOREA</p>
     </aside>
     <div class="prose">
       {{ content }}

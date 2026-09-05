@@ -1,26 +1,26 @@
 <header class="site-header">
-  <div class="edition-bar">
-    <div class="container edition-bar__inner">
-      <p><strong>SEOUL</strong><span aria-hidden="true">•</span>{{ site.time | date: '%Y.%m.%d' }}</p>
-      <p>INDEPENDENT TECHNOLOGY JOURNAL</p>
-    </div>
-  </div>
-
   <div class="container masthead">
     <a class="brand" href="{{ '/' | relative_url }}" aria-label="{{ site.title | escape }} 홈">
-      <strong class="brand__name">{{ site.title }}</strong>
-      <span class="brand__descriptor">Technology, systems<br>and field notes</span>
+      <strong class="brand__name"><span>KLM</span><span>4416</span></strong>
     </a>
 
-    <p class="masthead__statement">Ideas are cheap.<br><strong>Judgement is the work.</strong></p>
+    <nav class="utility-nav" aria-label="사용자 메뉴">
+      <a class="utility-nav__primary" href="{{ '/' | relative_url }}#latest">Read latest</a>
+      <a href="{{ '/about/' | relative_url }}">About</a>
+      <a href="https://github.com/{{ site.github_username }}" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a class="utility-nav__index" href="{{ '/' | relative_url }}#posts"><span aria-hidden="true">☰</span> Index</a>
+    </nav>
   </div>
 
-  <nav class="site-nav" aria-label="주요 메뉴">
-    <div class="container site-nav__inner">
-      <a class="site-nav__link{% if page.url == '/' or page.layout == 'post' %} is-active{% endif %}" href="{{ '/' | relative_url }}#posts"{% if page.url == '/' or page.layout == 'post' %} aria-current="page"{% endif %}>LATEST</a>
-      <a class="site-nav__link{% if page.url == '/about/' %} is-active{% endif %}" href="{{ '/about/' | relative_url }}"{% if page.url == '/about/' %} aria-current="page"{% endif %}>ABOUT</a>
-      <a class="site-nav__link" href="{{ '/feed.xml' | relative_url }}">RSS</a>
-      <a class="site-nav__link site-nav__link--external" href="https://github.com/{{ site.github_username }}" target="_blank" rel="noopener noreferrer">GITHUB <span aria-hidden="true">↗</span></a>
+  <nav class="section-nav" aria-label="저널 섹션">
+    <div class="container section-nav__inner">
+      <a href="{{ '/' | relative_url }}">Weekly edition</a>
+      <a href="{{ '/' | relative_url }}#latest">Latest</a>
+      <a href="{{ '/' | relative_url }}#desk-engineering">Engineering</a>
+      <a href="{{ '/' | relative_url }}#desk-systems">Systems</a>
+      <a href="{{ '/' | relative_url }}#desk-products">Products</a>
+      <a href="{{ '/' | relative_url }}#desk-research">Research</a>
+      <a href="{{ '/about/' | relative_url }}">About the journal</a>
     </div>
   </nav>
 </header>

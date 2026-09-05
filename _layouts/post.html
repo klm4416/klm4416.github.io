@@ -5,45 +5,76 @@ layout: default
 {% assign words = content | number_of_words %}
 {% assign reading_time = words | divided_by: 180 %}
 {% if reading_time < 1 %}{% assign reading_time = 1 %}{% endif %}
+{% assign page_section = page.section %}
+{% unless page_section %}{% assign page_section = page.categories | first %}{% endunless %}
+{% assign page_section = page_section | default: 'Technology' %}
+{% assign share_url = page.url | absolute_url | url_encode %}
+{% assign share_title = page.title | url_encode %}
 
-<article class="post">
-  <header class="post__header">
-    <div class="container container--article">
-      <a class="back-link" href="{{ '/' | relative_url }}#posts"><span aria-hidden="true">←</span> BACK TO LATEST</a>
-      <p class="story-kicker">{{ page.categories | first | default: '기록' }}</p>
+<article class="article">
+  <header class="article-header">
+    <div class="container container--story">
+      <a class="back-link" href="{{ '/' | relative_url }}#posts"><span aria-hidden="true">←</span> Latest</a>
+      <p class="story-section">{{ page_section }}</p>
+      {% if page.kicker %}<p class="article-header__rubric">{{ page.kicker }}</p>{% endif %}
       <h1>{{ page.title }}</h1>
       {% if page.description %}
-        <p class="post__description">{{ page.description }}</p>
+        <p class="article-header__standfirst">{{ page.description }}</p>
       {% endif %}
-      <div class="post__byline">
-        <p>BY <strong>{{ site.author.name | upcase }}</strong></p>
-        <p><time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: '%Y.%m.%d' }}</time><span aria-hidden="true"> • </span>{{ reading_time }} MIN READ</p>
+      <div class="article-byline">
+        <p>By <strong>{{ page.author | default: site.author.name }}</strong></p>
+        <p><time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: '%b %-d, %Y' }}</time><span aria-hidden="true"> | </span>SEOUL</p>
+        <p>{{ reading_time }} min read</p>
       </div>
+
+      <nav class="article-actions" aria-label="글 공유">
+        <span>Share</span>
+        <a href="https://twitter.com/intent/tweet?url={{ share_url }}&amp;text={{ share_title }}" target="_blank" rel="noopener noreferrer" aria-label="X에 공유">X</a>
+        <a href="mailto:?subject={{ share_title }}&amp;body={{ share_url }}" aria-label="이메일로 공유">@</a>
+      </nav>
     </div>
   </header>
 
-  <div class="container container--article post__body">
-    <aside class="post__rail" aria-label="글 정보">
-      <p>FILED UNDER</p>
-      {% if page.tags.size > 0 %}
-        <div class="tag-list">
-          {% for tag in page.tags %}<span class="tag">{{ tag }}</span>{% endfor %}
-        </div>
-      {% else %}
-        <strong>FIELD NOTES</strong>
-      {% endif %}
-      <p class="post__rail-location">SEOUL<br>REPUBLIC OF KOREA</p>
+  {% if page.image %}
+    <figure class="article-hero container container--story">
+      <img src="{{ page.image | relative_url }}" alt="{{ page.image_alt | default: '' | escape }}" width="1600" height="900">
+      {% if page.image_caption %}<figcaption>{{ page.image_caption }}</figcaption>{% endif %}
+    </figure>
+  {% endif %}
+
+  <div class="container container--story article-grid">
+    <aside class="article-folio" aria-label="글 정보">
+      <span>KLM4416</span>
+      <strong>{{ page.date | date: '%Y' }}</strong>
+      <p>FIELD<br>NOTE</p>
     </aside>
+
     <div class="prose">
       {{ content }}
     </div>
+
+    <aside class="article-sidebar" aria-label="관련 정보">
+      <section>
+        <h2>Topics</h2>
+        {% if page.tags.size > 0 %}
+          <div class="tag-list">{% for tag in page.tags %}<span class="tag">{{ tag }}</span>{% endfor %}</div>
+        {% else %}
+          <p>Technology</p>
+        {% endif %}
+      </section>
+      <section>
+        <h2>About this journal</h2>
+        <p>직접 만들며 얻은 판단과 시행착오를 기록합니다.</p>
+        <a href="{{ '/about/' | relative_url }}">More about KLM4416 →</a>
+      </section>
+    </aside>
   </div>
 
   {% if page.previous or page.next %}
-    <nav class="post-navigation container" aria-label="이전 및 다음 글">
+    <nav class="post-navigation container container--story" aria-label="이전 및 다음 글">
       {% if page.previous %}
         <a class="post-navigation__item" href="{{ page.previous.url | relative_url }}">
-          <span>이전 글</span>
+          <span>Previous</span>
           <strong>{{ page.previous.title }}</strong>
         </a>
       {% else %}
@@ -51,7 +82,7 @@ layout: default
       {% endif %}
       {% if page.next %}
         <a class="post-navigation__item post-navigation__item--next" href="{{ page.next.url | relative_url }}">
-          <span>다음 글</span>
+          <span>Next</span>
           <strong>{{ page.next.title }}</strong>
         </a>
       {% endif %}

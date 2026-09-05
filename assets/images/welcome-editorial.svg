@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">KLM4416 첫 번째 필드 노트</title>
+  <desc id="desc">브라우저 창과 코드 블록을 빨강, 검정, 회색의 인쇄물 스타일로 표현한 일러스트</desc>
+  <rect width="1600" height="900" fill="#dfe3e4"/>
+  <path d="M0 720h1600M0 540h1600M0 360h1600M0 180h1600M320 0v900M640 0v900M960 0v900M1280 0v900" stroke="#c3c9ca" stroke-width="2"/>
+  <circle cx="1255" cy="225" r="205" fill="#e3120b"/>
+  <rect x="150" y="132" width="1030" height="632" fill="#121212"/>
+  <rect x="182" y="164" width="966" height="568" fill="#f7f5f0"/>
+  <rect x="182" y="164" width="966" height="70" fill="#ffffff"/>
+  <circle cx="224" cy="199" r="10" fill="#e3120b"/>
+  <circle cx="258" cy="199" r="10" fill="#121212"/>
+  <circle cx="292" cy="199" r="10" fill="#9aa2a4"/>
+  <path d="M182 234h966" stroke="#121212" stroke-width="3"/>
+  <rect x="230" y="286" width="320" height="382" fill="#e3120b"/>
+  <text x="267" y="355" fill="#fff" font-family="Georgia, serif" font-size="45" font-weight="700">KLM</text>
+  <text x="267" y="408" fill="#fff" font-family="Georgia, serif" font-size="45" font-weight="700">4416</text>
+  <text x="267" y="610" fill="#fff" font-family="Arial, sans-serif" font-size="22" font-weight="700">FIELD NOTE</text>
+  <text x="267" y="640" fill="#fff" font-family="Arial, sans-serif" font-size="14">NO. 001 / SEOUL</text>
+  <rect x="608" y="294" width="426" height="22" fill="#121212"/>
+  <rect x="608" y="344" width="354" height="12" fill="#757b7d"/>
+  <rect x="608" y="377" width="460" height="12" fill="#757b7d"/>
+  <rect x="608" y="410" width="392" height="12" fill="#757b7d"/>
+  <rect x="608" y="492" width="500" height="176" fill="#121212"/>
+  <text x="648" y="565" fill="#e3120b" font-family="monospace" font-size="42" font-weight="700">{ }</text>
+  <path d="M760 548h286M648 604h340M648 634h245" stroke="#f7f5f0" stroke-width="10"/>
+  <path d="M1160 676l296-296v388H1068z" fill="#121212"/>
+  <path d="M1230 688l164-164" stroke="#f7f5f0" stroke-width="18"/>
+  <text x="1220" y="822" fill="#121212" font-family="Arial, sans-serif" font-size="20" font-weight="700" letter-spacing="3">BUILD / THINK / RECORD</text>
+</svg>
