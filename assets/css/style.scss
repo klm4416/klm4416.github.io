@@ -689,6 +689,15 @@ select {
   border-right: 0;
 }
 
+.desk-grid article > a {
+  display: block;
+  min-height: 100%;
+}
+
+.desk-grid article > a:hover h3 {
+  color: var(--red);
+}
+
 .desk-grid p {
   margin: 0 0 54px;
   color: var(--red);
